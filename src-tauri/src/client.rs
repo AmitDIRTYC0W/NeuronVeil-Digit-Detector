@@ -25,7 +25,7 @@ pub async fn evaluate(pixels: Vec<f32>) -> Result<Vec<f32>, String> {
         let input = Array1::from_vec(pixels);
         let input_com = input.mapv(Com::from_num);
 
-        debug!("input shape: {:?}", input_com.shape());
+        debug!("input: {:#?}", input_com);
 
         // Read the model file
         let model_file =
@@ -39,24 +39,24 @@ pub async fn evaluate(pixels: Vec<f32>) -> Result<Vec<f32>, String> {
         let output_com = model.infer_locally(input_com);
 
         // Convert the output from Com to float
-        let output = output_com.mapv(Com::to_num::<f32>);
+        let output = output_com.mapv(Com::to_num::<f32>) / 2e6;
 
-        let minimum = output
-            .iter()
-            .min_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap();
-        debug!("Min: {}", minimum);
-        let shifted_output = &output - *minimum;
-        debug!("Shifted output: {:#?}", shifted_output);
-        let maximum = shifted_output
-            .iter()
-            .max_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap();
-        let normalised_output = &shifted_output / *maximum;
+        // let minimum = output
+        //     .iter()
+        //     .min_by(|a, b| a.partial_cmp(b).unwrap())
+        //     .unwrap();
+        // debug!("Min: {}", minimum);
+        // let shifted_output = &output - *minimum;
+        // debug!("Shifted output: {:#?}", shifted_output);
+        // let maximum = shifted_output
+        //     .iter()
+        //     .max_by(|a, b| a.partial_cmp(b).unwrap())
+        //     .unwrap();
+        // let normalised_output = &shifted_output / *maximum;
 
-        // let normalised_output = softmax(&output.view())
-        //     .ok_or(anyhow!("Tried to softmax an empty array"))?
-        //     .to_vec();
+        let normalised_output = softmax(&output.view())
+            .ok_or(anyhow!("Tried to softmax an empty array"))?
+            .to_vec();
 
         debug!("Output: {:#} - {:?}", output, normalised_output);
 
