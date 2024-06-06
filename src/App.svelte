@@ -2,7 +2,12 @@
   import "./styles.css";
   
 	import { Jumper } from 'svelte-loading-spinners';
-  
+  import { VisXYContainer, VisGroupedBar, VisLine, VisAxis } from '@unovis/svelte'
+
+  type DataRecord = { x: number, y: number }
+  export let result: DataRecord[] = [
+  ]
+
   import Paint from './lib/Paint.svelte'
   import { invoke } from "@tauri-apps/api/tauri";
 
@@ -46,6 +51,20 @@
     try {
           result = await invoke("evaluate", { pixels: pixels });
           console.log(result);
+       let raw_result: number[] = await invoke("evaluate", { pixels: pixels });
+      
+      // data = [
+      //   { x: 0, y: 2 },
+      //   { x: 1, y: 0 },
+      //   { x: 2, y: 5 },
+      //   { x: 3, y: 6 },
+      //   { x: 4, y: 6 },
+      // ]
+    // console.log(result);
+      result = []
+      raw_result.forEach((v, i) => result.push({ x: i, y: v }));
+      console.log(result);
+      result = result;
     } catch (e) {
       error = e;
     }
@@ -77,7 +96,12 @@
         </div>
       {/if}
       {#if evaluated}
-        <p>{result}</p>
+        <div class="p-10">
+          <VisXYContainer width="50%">
+            <VisGroupedBar data={result} x={d => d.x} y={d => d.y}/>
+            <VisAxis type="x" numTicks={10} gridLine={false} tickTextFontSize="20pt"/>
+          </VisXYContainer>
+        </div>
       {/if}
       <p>{error}</p>
     </center>
