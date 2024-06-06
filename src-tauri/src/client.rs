@@ -21,10 +21,8 @@ pub async fn evaluate(pixels: Vec<f32>) -> Result<Vec<f32>, String> {
     sleep(Duration::from_millis(1000)).await;
 
     let output = tokio::task::spawn_blocking(move || -> anyhow::Result<Vec<f32>> {
-        // Invert the colours
-        let input = -Array1::from_vec(pixels) + 1f32;
-
         // Convert the input from float to Com
+        let input = Array1::from_vec(pixels);
         let input_com = input.mapv(Com::from_num);
 
         debug!("input shape: {:?}", input_com.shape());
