@@ -12,14 +12,45 @@
   import { invoke } from "@tauri-apps/api/tauri";
 
   const pixelSize = 45;
-  const targetResolution = 8;
+  const targetSize = 8;
 
   let getPaintData: () => ImageData;
 
   var evaluating = false;
   var evaluated = false;
   var error = "";
-  var result;
+
+  function resizeImageWithAverageAlpha(
+    imageData: ImageData,
+    newWidth: number,
+    newHeight: number
+  ): number[] {
+    const { data, width, height } = imageData;
+    const alphaValues: number[] = [];
+    const ratioX = width / newWidth;
+    const ratioY = height / newHeight;
+
+    for (let y = 0; y < newHeight; y++) {
+      for (let x = 0; x < newWidth; x++) {
+        let totalAlpha = 0;
+        let count = 0;
+
+        for (let j = 0; j < ratioY; j++) {
+          for (let i = 0; i < ratioX; i++) {
+            const pixelIndex = ((y * ratioY + j) * width + (x * ratioX + i)) * 4 + 3;
+            totalAlpha += data[pixelIndex];
+            count++;
+          }
+        }
+
+        const averageAlpha = totalAlpha / count;
+        alphaValues.push(averageAlpha);
+      }
+    }
+
+    return alphaValues;
+  }
+
 
   async function evaluate() {
     evaluating = true;
@@ -27,30 +58,10 @@
 
     // Create an array of pixels
     const image = getPaintData();
-    let pixels = [];
-    image.data.forEach((value: number, index: number, _: Uint8ClampedArray) => {
+    let pixels = resizeImageWithAverageAlpha(image, targetSize, targetSize);
+    pixels = pixels.map((v) => v / 16);
       
-      // Process alpha values only
-      if (index % 4 != 3) {
-        return;
-      }
-
-      // Process only the pixels in the centre of each cell
-      const pixelIndex = Math.floor(index / 4);
-      if (Math.floor(pixelIndex / image.width) % pixelSize != Math.floor(pixelSize / 2)) {
-        return;
-      }
-
-      if (pixelIndex % pixelSize != Math.floor(pixelSize / 2)) {
-        return;
-      }
-
-      pixels.push(value / 255);
-    });
-
     try {
-          result = await invoke("evaluate", { pixels: pixels });
-          console.log(result);
        let raw_result: number[] = await invoke("evaluate", { pixels: pixels });
       
       // data = [
@@ -83,18 +94,21 @@
   <main>
     <center>
       <Paint
-        width={targetResolution * pixelSize}
-        height={targetResolution * pixelSize}
+        width={targetSize * pixelSize}
+        height={targetSize * pixelSize}
         locked={evaluating}
         bind:getImageData={getPaintData}/>
+
       {#if !evaluating}
         <button class="p-2 rounded-md text-white shadow-md bg-sky-500" on:click={evaluate}>Evaluate</button>
       {/if}
+
       {#if evaluating}
         <div class="p-4">
           <Jumper size="5" unit="em" color="#0ea5e9" />
         </div>
       {/if}
+
       {#if evaluated}
         <div class="p-10">
           <VisXYContainer width="50%">
