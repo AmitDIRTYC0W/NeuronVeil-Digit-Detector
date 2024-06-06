@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Konva from 'konva';
+  import Konva from 'konva';
   import { Stage, Layer, Rect, Line } from 'svelte-konva';
 
   export let width: number;
@@ -8,8 +8,8 @@
   export let tension: number = 0.5;
   export let stroke: string = '#363636';
   export let background: string = '#f5f5f5';
-  export let strokeWidth: number = 25;
-  export let cornerRadius: number = 25;
+  export let strokeWidth: number = 40;
+  export let cornerRadius: number = 40;
   export let locked: boolean = false;
   
   var isPainting = false;
