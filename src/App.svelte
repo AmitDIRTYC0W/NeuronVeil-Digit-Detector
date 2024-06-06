@@ -103,8 +103,9 @@
           </VisXYContainer>
         </div>
       {/if}
-      <p>{error}</p>
-    </center>
+
+      <p class="font-bold text-red-500">{error}</p>
+     </center>
   </main>
 </section>
 
