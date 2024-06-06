@@ -1,0 +1,28 @@
+[package]
+name = "neuronveil-digit-detector"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["Amit Goren"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+tauri = { version = "1", features = ["shell-open"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+neuronveil = { git = "https://github.com/AmitDIRTYC0W/neuronveil.git", version = "0.1.0", features = ["utils"] }
+flexi_logger = "0.28.0"
+tokio = "1.37.0"
+s2n-quic = "1.37.0"
+ring = "0.17.8"
+ndarray = { git = "https://github.com/AmitDIRTYC0W/ndarray.git", version = "0.16.0" }
+log = "0.4.21"
+anyhow = { version = "1.0.86", features = ["backtrace"] }
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
